@@ -18,6 +18,7 @@ func init() {
 }
 func (video *Video) Validate() error {
 	_, err := govalidator.ValidateStruct(video)
+
 	if err != nil {
 		return err
 	}
