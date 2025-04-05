@@ -88,6 +88,6 @@ func TestJobRepositoryUpdate(t *testing.T) {
 	updatedJob, err := repoJob.Update(job)
 
 	require.Nil(t, err)
-	require.Equal(t, "Finished", updatedJob.Status)
+	require.Equal(t, job.Status, updatedJob.Status)
 
 }
