@@ -42,7 +42,7 @@ func (repository *VideoRepositoryDB) Find(id string) (*domain.Video, error) {
 		return nil, fmt.Errorf("ID MUST BE GIVEN")
 	}
 
-	repository.Connection.First(&video, "id = ?", id)
+	repository.Connection.Preload("Jobs").First(&video, "id = ?", id)
 
 	if video.ID == "" {
 		return nil, fmt.Errorf("VIDEO DOES NOT EXIST")
