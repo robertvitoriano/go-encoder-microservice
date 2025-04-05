@@ -47,3 +47,47 @@ func TestJobRepositoryInsert(t *testing.T) {
 	require.Equal(t, job.VideoID, createdJob.VideoID)
 
 }
+
+func TestJobRepositoryUpdate(t *testing.T) {
+
+	db := database.NewDbTest()
+	defer db.Close()
+
+	video := domain.NewVideo()
+	video.ID = uuid.NewV4().String()
+	video.CreatedAt = time.Now()
+	video.FilePath = "path"
+
+	repo := repositories.VideoRepositoryDB{Connection: db}
+	_, err := repo.Insert(video)
+
+	require.Nil(t, err)
+
+	job, err := domain.NewJob("output_path", "Pending", video)
+	require.Nil(t, err)
+
+	repoJob := repositories.JobRepositoryDB{Connection: db}
+
+	require.Nil(t, err)
+
+	job, err = repoJob.Insert(job)
+
+	require.Nil(t, err)
+
+	require.NotEmpty(t, job.ID)
+
+	createdJob, err := repoJob.Find(job.ID)
+
+	require.Nil(t, err)
+	require.Equal(t, job.ID, createdJob.ID)
+
+	require.Equal(t, job.VideoID, createdJob.VideoID)
+
+	job.Status = "Finished"
+
+	updatedJob, err := repoJob.Update(job)
+
+	require.Nil(t, err)
+	require.Equal(t, "Finished", updatedJob.Status)
+
+}
