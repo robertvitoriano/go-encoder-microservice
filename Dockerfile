@@ -28,6 +28,8 @@ RUN apk add --update --upgrade python unzip bash gcc g++ scons && \
     cp -R ${BENTO4_PATH}/Source/Python/utils ${BENTO4_PATH}/utils && \
     cp -a ${BENTO4_PATH}/Source/Python/wrappers/. ${BENTO4_PATH}/bin
 
+
+RUN export GOOGLE_APPLICATION_CREDENTIALS=/go/src/bucket-credentials.json
 WORKDIR /go/src
 
 ENTRYPOINT ["tail", "-f", "/dev/null"]
