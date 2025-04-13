@@ -47,3 +47,18 @@ func TestVideoServiceDownload(t *testing.T) {
 	require.Nil(t, err)
 
 }
+
+func TestVideoServiceFragmentation(t *testing.T) {
+	video, videoRepository := prepare()
+	videoService := services.NewVideoService()
+	videoService.Video = video
+	videoService.VideoRepository = videoRepository
+
+	err := videoService.Download("go-encodertest")
+
+	require.Nil(t, err)
+
+	err = videoService.Fragment()
+
+	require.Nil(t, err)
+}
