@@ -17,7 +17,7 @@ type VideoRepositoryDB struct {
 	Connection *gorm.DB
 }
 
-func NewVideoRepository(db *gorm.DB) *VideoRepositoryDB {
+func NewVideoRepository(db *gorm.DB) VideoRepository {
 	return &VideoRepositoryDB{Connection: db}
 }
 

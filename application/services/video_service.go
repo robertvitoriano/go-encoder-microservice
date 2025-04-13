@@ -2,7 +2,8 @@ package services
 
 import (
 	"context"
-	"io"
+	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
@@ -41,8 +42,9 @@ func (v *VideoService) Download(bucketName string) error {
 	defer reader.Close()
 
 	log.Printf("Video %v has been stored", v.Video.ID)
+	fmt.Println("READER", reader)
 
-	body, err := io.ReadAll(reader)
+	body, err := ioutil.ReadAll(reader)
 
 	if err != nil {
 		return err
