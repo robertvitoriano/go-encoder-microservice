@@ -89,17 +89,14 @@ func getClientUpload() (*storage.Client, context.Context, error) {
 
 func (vu *VideoUpload) ProcessUpload(concurrency int, doneUpload chan string) error {
 	pathIndexChannel := make(chan int, runtime.NumCPU())
-
 	resultChannel := make(chan string)
 
 	err := vu.loadPaths()
-
 	if err != nil {
 		return err
 	}
 
 	if uploadClient, ctx, err := getClientUpload(); err == nil {
-
 		for proccess := 0; proccess < concurrency; proccess++ {
 			go vu.uploadWorkder(pathIndexChannel, resultChannel, uploadClient, ctx)
 		}
@@ -108,17 +105,24 @@ func (vu *VideoUpload) ProcessUpload(concurrency int, doneUpload chan string) er
 			for i := 0; i < len(vu.Paths); i++ {
 				pathIndexChannel <- i
 			}
+			close(pathIndexChannel) // Fechar o canal após enviar todos os índices
 		}()
 
-		for result := range resultChannel {
-			if result != "" {
-				doneUpload <- result
-				break
+		go func() {
+			for result := range resultChannel {
+				if result != "" {
+					doneUpload <- result
+					break
+				}
 			}
+			close(doneUpload) // Fechar o canal doneUpload após processar os resultados
+		}()
+
+		for range vu.Paths {
+			// Consumir todos os resultados para garantir que o canal seja esvaziado
+			<-resultChannel
 		}
-
-		close(pathIndexChannel)
-
+		close(resultChannel) // Fechar o canal resultChannel após o processamento
 		return nil
 	}
 
@@ -128,15 +132,13 @@ func (vu *VideoUpload) ProcessUpload(concurrency int, doneUpload chan string) er
 func (vu *VideoUpload) uploadWorkder(pathIndexChannel chan int, resultChannel chan string, uploadClient *storage.Client, ctx context.Context) {
 	for i := range pathIndexChannel {
 		err := vu.UploadObject(vu.Paths[i], uploadClient, ctx)
-
 		if err != nil {
 			vu.Errors = append(vu.Errors, vu.Paths[i])
 			log.Printf("Error during the upload: %v. Error: %v", vu.Paths[i], err)
 			resultChannel <- err.Error()
+			break
 		}
-
 		resultChannel <- ""
-
 	}
 
 	resultChannel <- "Uploaded completed"
