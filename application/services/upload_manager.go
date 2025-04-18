@@ -105,7 +105,7 @@ func (vu *VideoUpload) ProcessUpload(concurrency int, doneUpload chan string) er
 			for i := 0; i < len(vu.Paths); i++ {
 				pathIndexChannel <- i
 			}
-			close(pathIndexChannel) // Fechar o canal após enviar todos os índices
+			close(pathIndexChannel)
 		}()
 
 		go func() {
@@ -115,14 +115,8 @@ func (vu *VideoUpload) ProcessUpload(concurrency int, doneUpload chan string) er
 					break
 				}
 			}
-			close(doneUpload) // Fechar o canal doneUpload após processar os resultados
 		}()
 
-		for range vu.Paths {
-			// Consumir todos os resultados para garantir que o canal seja esvaziado
-			<-resultChannel
-		}
-		close(resultChannel) // Fechar o canal resultChannel após o processamento
 		return nil
 	}
 
