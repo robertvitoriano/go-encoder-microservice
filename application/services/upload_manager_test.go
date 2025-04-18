@@ -22,6 +22,10 @@ func init() {
 
 func TestUploadManagerUpload(t *testing.T) {
 
+	if err := deleteTestFiles(); err != nil {
+		fmt.Println(err)
+	}
+
 	video, videoRepository := prepare()
 	videoService := services.NewVideoService()
 	videoService.Video = video
@@ -48,7 +52,7 @@ func TestUploadManagerUpload(t *testing.T) {
 
 	uploadResult := <-done
 
-	require.Equal(t, uploadResult, "Uploaded completed")
+	require.Equal(t, "Uploaded completed", uploadResult)
 	if err := deleteTestFiles(); err != nil {
 		fmt.Println(err)
 	}
