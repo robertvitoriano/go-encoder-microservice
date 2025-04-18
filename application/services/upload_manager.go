@@ -88,13 +88,14 @@ func getClientUpload() (*storage.Client, context.Context, error) {
 }
 
 func (vu *VideoUpload) ProcessUpload(concurrency int, doneUpload chan string) error {
-	pathIndexChannel := make(chan int, runtime.NumCPU())
-	resultChannel := make(chan string)
-
 	err := vu.loadPaths()
+
 	if err != nil {
 		return err
 	}
+
+	pathIndexChannel := make(chan int, runtime.NumCPU())
+	resultChannel := make(chan string, len(vu.Paths))
 
 	if uploadClient, ctx, err := getClientUpload(); err == nil {
 		for proccess := 0; proccess < concurrency; proccess++ {
