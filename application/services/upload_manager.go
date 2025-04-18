@@ -108,14 +108,12 @@ func (vu *VideoUpload) ProcessUpload(concurrency int, doneUpload chan string) er
 			close(pathIndexChannel)
 		}()
 
-		go func() {
-			for result := range resultChannel {
-				if result != "" {
-					doneUpload <- result
-					break
-				}
+		for result := range resultChannel {
+			if result != "" {
+				doneUpload <- result
+				break
 			}
-		}()
+		}
 
 		return nil
 	}
