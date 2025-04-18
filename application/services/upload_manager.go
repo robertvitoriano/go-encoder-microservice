@@ -3,7 +3,6 @@ package services
 import (
 	"context"
 	"io"
-	"io/fs"
 	"log"
 	"os"
 	"path/filepath"
@@ -57,12 +56,15 @@ func (v *VideoUpload) UploadObject(objectPath string, client *storage.Client, ct
 }
 
 func (vu *VideoUpload) loadPaths() error {
-	err := filepath.Walk(vu.VideoPath, func(path string, info fs.FileInfo, err error) error {
+	err := filepath.Walk(vu.VideoPath, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			log.Printf("Error accessing path %s: %v", path, err)
+			return err
+		}
 
 		if !info.IsDir() {
 			vu.Paths = append(vu.Paths, path)
 		}
-
 		return nil
 	})
 
