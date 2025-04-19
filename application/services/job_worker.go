@@ -16,12 +16,8 @@ type JobWorkerResult struct {
 	Message *amqp.Delivery
 	Error   error
 }
-type MessageBody struct {
-	ResourceId string `json:"resource_id"`
-	FilePath   string `json:"file_path"`
-}
 
-func JobWorker(messageChannel chan amqp.Delivery, resultChannel chan JobWorkerResult, jobService JobService, job domain.Job, workerId int) {
+func JobWorker(messageChannel chan amqp.Delivery, resultChannel chan JobWorkerResult, jobService JobService, workerId int) {
 
 	for message := range messageChannel {
 		err := utils.IsJson(string(message.Body))
@@ -53,15 +49,13 @@ func JobWorker(messageChannel chan amqp.Delivery, resultChannel chan JobWorkerRe
 			continue
 		}
 
-		job.Video = jobService.VideoService.Video
-
-		job.OutputBucketPath = os.Getenv("OUTPUT_BUCKET")
-
-		job.ID = uuid.NewV4().String()
-
-		job.Status = "STARTING"
-
-		job.CreatedAt = time.Now()
+		job := domain.Job{
+			Video:            jobService.VideoService.Video,
+			OutputBucketPath: os.Getenv("OUTPUT_BUCKET"),
+			ID:               uuid.NewV4().String(),
+			Status:           "STARTING",
+			CreatedAt:        time.Now(),
+		}
 
 		_, err = jobService.JobRepository.Insert(&job)
 
