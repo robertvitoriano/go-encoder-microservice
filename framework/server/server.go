@@ -65,6 +65,9 @@ func main() {
 
 	fmt.Println("Waiting from messages...")
 
+	rabbitMQ.SetupDeadLetterExchange()
+	rabbitMQ.SetupUploadResultsQueue()
+
 	jobManager.Start(rabbitMQChannel)
 
 }

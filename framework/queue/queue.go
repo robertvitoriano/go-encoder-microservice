@@ -103,6 +103,70 @@ func (r *RabbitMQ) Notify(message string, contentType string, exchange string, r
 	return nil
 }
 
+func (r *RabbitMQ) SetupDeadLetterExchange() {
+	err := r.Channel.ExchangeDeclare(
+		os.Getenv("RABBITMQ_DLX"), // exchange name
+		"direct",                  // exchange type
+		true,                      // durable
+		false,                     // auto-deleted
+		false,                     // internal
+		false,                     // no-wait
+		nil,                       // arguments
+	)
+	failOnError(err, "Failed to declare Dead Letter Exchange")
+
+	_, err = r.Channel.QueueDeclare(
+		"upload_failures", // DLQ name
+		true,              // durable
+		false,             // delete when unused
+		false,             // exclusive
+		false,             // no-wait
+		nil,               // arguments
+	)
+	failOnError(err, "Failed to declare Dead Letter Queue")
+
+	err = r.Channel.QueueBind(
+		"upload_failures",         // queue name
+		"upload_failures_key",     // routing key
+		os.Getenv("RABBITMQ_DLX"), // exchange name
+		false,                     // no-wait
+		nil,                       // arguments
+	)
+	failOnError(err, "Failed to bind Dead Letter Queue to Dead Letter Exchange")
+}
+
+func (r *RabbitMQ) SetupUploadResultsQueue() {
+	err := r.Channel.ExchangeDeclare(
+		os.Getenv("RABBITMQ_NOTIFICATION_EX"), // exchange name
+		"direct",                              // exchange type
+		true,                                  // durable
+		false,                                 // auto-deleted
+		false,                                 // internal
+		false,                                 // no-wait
+		nil,                                   // arguments
+	)
+	failOnError(err, "Failed to declare Dead Letter Exchange")
+
+	_, err = r.Channel.QueueDeclare(
+		"upload_results", // Queue name
+		true,             // Durable
+		false,            // Delete when unused
+		false,            // Exclusive
+		false,            // No-wait
+		nil,              // Arguments
+	)
+	failOnError(err, "Failed to declare upload_results queue")
+
+	err = r.Channel.QueueBind(
+		"upload_results", // Queue name
+		os.Getenv("RABBITMQ_NOTIFICATION_ROUTING_KEY"), // Routing key
+		os.Getenv("RABBITMQ_NOTIFICATION_EX"),          // Exchange name
+		false,                                          // No-wait
+		nil,                                            // Arguments
+	)
+	failOnError(err, "Failed to bind upload_results queue to exchange")
+}
+
 func failOnError(err error, msg string) {
 	if err != nil {
 		log.Fatalf("%s: %s", msg, err)
