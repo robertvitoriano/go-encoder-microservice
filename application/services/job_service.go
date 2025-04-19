@@ -32,6 +32,9 @@ func (j *JobService) failJob(err error) error {
 	j.Job.Status = "FAILED"
 	j.Job.Error = err.Error()
 
+	if err != nil {
+		return err
+	}
 	_, err = j.JobRepository.Update(j.Job)
 
 	if err != nil {
