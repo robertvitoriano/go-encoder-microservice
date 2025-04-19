@@ -105,12 +105,12 @@ func (j *JobManager) checkParseErrors(jobResult JobWorkerResult) error {
 	if jobResult.Job.ID != "" {
 		log.Printf("MessageID %v. Failed Job: %v", jobResult.Message.DeliveryTag, jobResult.Job.ID)
 	} else {
-		log.Printf("MessageID %v. Error parsing message : %v", jobResult.Message.DeliveryTag, jobResult.Job.ID)
-
+		log.Printf("MessageID %v. Error parsing message : %v", jobResult.Error.Error(), jobResult.Job.ID)
 	}
 
 	errorMessage := JobNotificationError{
 		Message: string(jobResult.Message.Body),
+		Error:   jobResult.Error.Error(),
 	}
 
 	jobJSON, err := json.Marshal(errorMessage)
