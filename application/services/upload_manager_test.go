@@ -15,14 +15,14 @@ func init() {
 	if err := godotenv.Load("../../.env"); err != nil {
 		log.Fatalf("Error loading .env")
 	}
-	if err := deleteTestFiles(); err != nil {
+	if err := services.DeleteTestFiles(); err != nil {
 		fmt.Println(err)
 	}
 }
 
 func TestUploadManagerUpload(t *testing.T) {
 
-	if err := deleteTestFiles(); err != nil {
+	if err := services.DeleteTestFiles(); err != nil {
 		fmt.Println(err)
 	}
 
@@ -53,7 +53,7 @@ func TestUploadManagerUpload(t *testing.T) {
 	uploadResult := <-done
 
 	require.Equal(t, "Uploaded completed", uploadResult)
-	if err := deleteTestFiles(); err != nil {
+	if err := services.DeleteTestFiles(); err != nil {
 		fmt.Println(err)
 	}
 

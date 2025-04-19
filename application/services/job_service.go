@@ -79,7 +79,26 @@ func (j *JobService) Start() error {
 
 	}
 
-	j.performUpload()
+	err = j.performUpload()
+
+	if err != nil {
+		return j.failJob(err)
+
+	}
+
+	err = j.changeStatus("FINISHING")
+
+	if err != nil {
+		return j.failJob(err)
+	}
+
+	j.VideoService.Finish()
+
+	err = j.changeStatus("COMPLETED")
+
+	if err != nil {
+		return j.failJob(err)
+	}
 
 	return nil
 

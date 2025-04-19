@@ -7,6 +7,8 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
+	"strings"
 
 	"cloud.google.com/go/storage"
 	"github.com/robertvitoriano/go-encoder-microservice/application/repositories"
@@ -115,4 +117,44 @@ func printOutput(output []byte) {
 	if len(output) > 0 {
 		log.Printf("======> Output: %s\n", string(output))
 	}
+}
+
+func DeleteTestFiles() error {
+	files, err := ioutil.ReadDir("/tmp")
+	if err != nil {
+		return fmt.Errorf("could not read /tmp directory: %v", err)
+	}
+
+	for _, file := range files {
+		name := file.Name()
+		if name == "bento4" || strings.Contains(name, "go-build") {
+			continue
+		}
+		err := os.RemoveAll(filepath.Join("/tmp", name))
+		if err != nil {
+			return fmt.Errorf("could not remove %s: %v", name, err)
+		}
+	}
+
+	return nil
+}
+
+func (v *VideoService) Finish() error {
+	files, err := ioutil.ReadDir("/tmp")
+	if err != nil {
+		return fmt.Errorf("could not read /tmp directory: %v", err)
+	}
+
+	for _, file := range files {
+		name := file.Name()
+		if name == "bento4" || strings.Contains(name, "go-build") {
+			continue
+		}
+		err := os.RemoveAll(filepath.Join("/tmp", name))
+		if err != nil {
+			return fmt.Errorf("could not remove %s: %v", name, err)
+		}
+	}
+
+	return nil
 }
