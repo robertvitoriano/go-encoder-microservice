@@ -44,8 +44,8 @@ func NewDbTest() *gorm.DB {
 func (database *Dabase) Connect() (*gorm.DB, error) {
 	var err error
 
-	if database.Env != "Test" {
-		database.Db, err = gorm.Open(database.DbType, database.Dsn) // Ensure 'Dsn' is correct
+	if database.Env != "test" && database.Env != "dev" {
+		database.Db, err = gorm.Open(database.DbType, database.Dsn)
 
 		if err != nil {
 			return nil, err
@@ -65,9 +65,9 @@ func (database *Dabase) Connect() (*gorm.DB, error) {
 	}
 
 	if database.AutoMigrateDb {
+		log.Println("Running AutoMigrate...")
 		database.Db.AutoMigrate(&domain.Video{}, &domain.Job{})
 		database.Db.Model(domain.Job{}).AddForeignKey("video_id", "videos (id)", "CASCADE", "CASCADE")
 	}
-
 	return database.Db, nil
 }
