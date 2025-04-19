@@ -17,7 +17,7 @@ type JobWorkerResult struct {
 	Error   error
 }
 
-func JobWorker(messageChannel chan amqp.Delivery, resultChannel chan JobWorkerResult, jobService JobService, workerId int) {
+func JobWorker(messageChannel chan amqp.Delivery, resultChannel chan JobWorkerResult, jobService JobService, job domain.Job, workerId int) {
 
 	for message := range messageChannel {
 		err := utils.IsJson(string(message.Body))
@@ -49,7 +49,7 @@ func JobWorker(messageChannel chan amqp.Delivery, resultChannel chan JobWorkerRe
 			continue
 		}
 
-		job := domain.Job{
+		job = domain.Job{
 			Video:            jobService.VideoService.Video,
 			OutputBucketPath: os.Getenv("OUTPUT_BUCKET"),
 			ID:               uuid.NewV4().String(),
