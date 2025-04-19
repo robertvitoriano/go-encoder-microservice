@@ -14,4 +14,11 @@ func TestIsJson(t *testing.T) {
 	err := utils.IsJson(testJSON)
 
 	require.Nil(t, err)
+
+	testJSON = `asdsadasdsa`
+
+	err = utils.IsJson(testJSON)
+
+	require.Error(t, err)
+
 }
