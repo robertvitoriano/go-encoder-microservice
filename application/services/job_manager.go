@@ -103,9 +103,10 @@ func (j *JobManager) notifySuccess(jobResult JobWorkerResult, rabbitMQChannel *a
 
 func (j *JobManager) checkParseErrors(jobResult JobWorkerResult) error {
 	if jobResult.Job.ID != "" {
-		log.Printf("MessageID #{jobResult.Message.DeliveryTag}. Failed Job: #{jobResult.Job.ID}")
+		log.Printf("MessageID %v. Failed Job: %v", jobResult.Message.DeliveryTag, jobResult.Job.ID)
 	} else {
-		log.Printf("MessageID #{jobResult.Message.DeliveryTag}. Error parsing message : #{jobResult.Job.ID}")
+		log.Printf("MessageID %v. Error parsing message : %v", jobResult.Message.DeliveryTag, jobResult.Job.ID)
+
 	}
 
 	errorMessage := JobNotificationError{
