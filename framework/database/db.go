@@ -3,6 +3,8 @@ package database
 import (
 	"log"
 
+	_ "github.com/lib/pq"
+
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"github.com/robertvitoriano/go-encoder-microservice/domain"
@@ -43,7 +45,7 @@ func (database *Dabase) Connect() (*gorm.DB, error) {
 	var err error
 
 	if database.Env != "Test" {
-		database.Db, err = gorm.Open(database.DbType, database.Dsn)
+		database.Db, err = gorm.Open(database.DbType, database.Dsn) // Ensure 'Dsn' is correct
 
 		if err != nil {
 			return nil, err

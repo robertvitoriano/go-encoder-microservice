@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"strconv"
@@ -18,13 +19,18 @@ func init() {
 	err := godotenv.Load()
 
 	if err != nil {
-		log.Fatalf("Error loggin .env file")
+		log.Fatalf("Error loading .env file: %v", err)
 	}
 
-	automigrateDB, _ := strconv.ParseBool(os.Getenv("AUTO_MIGRATE_DB"))
+	automigrateDB, err := strconv.ParseBool(os.Getenv("AUTO_MIGRATE_DB"))
+	if err != nil {
+		log.Fatalf("Error parsing automigrate: %v", err)
+	}
 
-	debug, _ := strconv.ParseBool("DEBUG")
-
+	debug, err := strconv.ParseBool(os.Getenv("DEBUG"))
+	if err != nil {
+		log.Fatalf("Error parsing debug: %v", err)
+	}
 	db.AutoMigrateDb = automigrateDB
 	db.Debug = debug
 	db.DsnTest = os.Getenv("DSN_TEST")
@@ -42,7 +48,7 @@ func main() {
 	dbConnection, err := db.Connect()
 
 	if err != nil {
-		log.Fatalf("Error connectioni to DB")
+		log.Fatalf("Error connecting to DB: %v", err)
 	}
 
 	defer dbConnection.Close()
@@ -56,6 +62,8 @@ func main() {
 	rabbitMQ.Consume(messageChannel)
 
 	jobManager := services.NewJobManager(dbConnection, rabbitMQ, jobResultChannel, messageChannel)
+
+	fmt.Println("Waiting from messages...")
 
 	jobManager.Start(rabbitMQChannel)
 
