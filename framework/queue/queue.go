@@ -106,7 +106,7 @@ func (r *RabbitMQ) Notify(message string, contentType string, exchange string, r
 func (r *RabbitMQ) SetupDeadLetterExchange() {
 	err := r.Channel.ExchangeDeclare(
 		os.Getenv("RABBITMQ_DLX"), // exchange name
-		"direct",                  // exchange type
+		"fanout",                  // exchange type
 		true,                      // durable
 		false,                     // auto-deleted
 		false,                     // internal
