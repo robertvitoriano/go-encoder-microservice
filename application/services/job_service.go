@@ -16,7 +16,7 @@ type JobService struct {
 	VideoService  VideoService
 }
 
-func (j *JobService) changeStatus(status string) error {
+func (j *JobService) changeStatus(status domain.JobStatus) error {
 	var err error
 	fmt.Printf("STATUS UPDATED FROM %v to %v\n", j.Job.Status, status)
 	j.Job.Status = status
@@ -29,7 +29,7 @@ func (j *JobService) changeStatus(status string) error {
 }
 
 func (j *JobService) failJob(err error) error {
-	j.Job.Status = "FAILED"
+	j.Job.Status = domain.JobStatusFailed
 	j.Job.Error = err.Error()
 
 	if err != nil {
@@ -43,8 +43,9 @@ func (j *JobService) failJob(err error) error {
 
 	return err
 }
+
 func (j *JobService) Start() error {
-	err := j.changeStatus("DOWNLOADING")
+	err := j.changeStatus(domain.JobStatusDownloading)
 
 	if err != nil {
 		return j.failJob(err)
@@ -56,7 +57,7 @@ func (j *JobService) Start() error {
 		return j.failJob(err)
 	}
 
-	err = j.changeStatus("FRAGMENTING")
+	err = j.changeStatus(domain.JobStatusFragmenting)
 
 	if err != nil {
 		return j.failJob(err)
@@ -69,7 +70,7 @@ func (j *JobService) Start() error {
 
 	}
 
-	err = j.changeStatus("ENCODING")
+	err = j.changeStatus(domain.JobStatusEncoding)
 
 	if err != nil {
 		return j.failJob(err)
@@ -89,7 +90,7 @@ func (j *JobService) Start() error {
 
 	}
 
-	err = j.changeStatus("FINISHING")
+	err = j.changeStatus(domain.JobStatusFinishing)
 
 	if err != nil {
 		return j.failJob(err)
@@ -97,18 +98,17 @@ func (j *JobService) Start() error {
 
 	j.VideoService.Finish()
 
-	err = j.changeStatus("COMPLETED")
+	err = j.changeStatus(domain.JobStatusCompleted)
 
 	if err != nil {
 		return j.failJob(err)
 	}
 
 	return nil
-
 }
 
 func (j *JobService) performUpload() error {
-	err := j.changeStatus("UPLOADING")
+	err := j.changeStatus(domain.JobStatusUploading)
 
 	if err != nil {
 		return j.failJob(err)
