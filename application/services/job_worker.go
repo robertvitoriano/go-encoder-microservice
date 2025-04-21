@@ -3,6 +3,7 @@ package services
 import (
 	"encoding/json"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/robertvitoriano/go-encoder-microservice/domain"
@@ -17,6 +18,8 @@ type JobWorkerResult struct {
 	Error   error
 }
 
+var mutex = &sync.Mutex{}
+
 func JobWorker(messageChannel chan amqp.Delivery, resultChannel chan JobWorkerResult, jobService JobService, job domain.Job, workerId int) {
 
 	for message := range messageChannel {
@@ -26,15 +29,17 @@ func JobWorker(messageChannel chan amqp.Delivery, resultChannel chan JobWorkerRe
 			resultChannel <- returnJobResult(domain.Job{}, message, err)
 			continue
 		}
-
+		mutex.Lock()
 		err = json.Unmarshal([]byte(message.Body), &jobService.VideoService.Video)
-
+		mutex.Unlock()
 		if err != nil {
 			resultChannel <- returnJobResult(domain.Job{}, message, err)
 			continue
 		}
 
+		mutex.Lock()
 		jobService.VideoService.Video.ID = uuid.NewV4().String()
+		mutex.Unlock()
 
 		err = jobService.VideoService.Video.Validate()
 		if err != nil {
@@ -49,6 +54,7 @@ func JobWorker(messageChannel chan amqp.Delivery, resultChannel chan JobWorkerRe
 			continue
 		}
 
+		mutex.Lock()
 		job = domain.Job{
 			Video:            jobService.VideoService.Video,
 			OutputBucketPath: os.Getenv("OUTPUT_BUCKET"),
@@ -56,6 +62,7 @@ func JobWorker(messageChannel chan amqp.Delivery, resultChannel chan JobWorkerRe
 			Status:           "STARTING",
 			CreatedAt:        time.Now(),
 		}
+		mutex.Unlock()
 
 		_, err = jobService.JobRepository.Insert(&job)
 

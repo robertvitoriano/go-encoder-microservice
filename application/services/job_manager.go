@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"sync"
 
 	"github.com/jinzhu/gorm"
 	"github.com/robertvitoriano/go-encoder-microservice/application/repositories"
@@ -25,6 +26,8 @@ type JobNotificationError struct {
 	Message string `json:"messaage"`
 	Error   string `json:"error"`
 }
+
+var notifyMutex = &sync.Mutex{}
 
 func NewJobManager(db *gorm.DB, rabbitMQ *queue.RabbitMQ, jobResultChannel chan JobWorkerResult, messageChannel chan amqp.Delivery) *JobManager {
 
@@ -78,11 +81,12 @@ func (j *JobManager) notify(jobJSON []byte) error {
 	if err != nil {
 		return err
 	}
-
 	return nil
 }
 func (j *JobManager) notifySuccess(jobResult JobWorkerResult, rabbitMQChannel *amqp.Channel) error {
+	mutex.Lock()
 	jobJSONError, err := json.Marshal(jobResult.Job)
+	mutex.Unlock()
 
 	if err != nil {
 		return err
@@ -97,7 +101,6 @@ func (j *JobManager) notifySuccess(jobResult JobWorkerResult, rabbitMQChannel *a
 	if err != nil {
 		return err
 	}
-
 	return nil
 }
 
